@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% load static %}
+<head>
+<meta charset="utf-8">
+<title>base</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link href="{% static 'css/chat_window.css' %}" rel="stylesheet">
+<link href="{% static 'css/login.css' %}" rel="stylesheet">
+
+</head>
+<body>
+<section class="msger">
+  <header class="msger-header">
+    <div class="msger-header-title">
+      <i class="fas fa-comment-alt"></i> QuickChat
+    </div>
+    
+
+    <div class="msger-header-options">
+      <a href="home-link"><i class="fas fa-home"></i></a>
+      <a href="message-link"><i class="fas fa-envelope"></i></a>
+      <a href="notifications-link"><i class="fas fa-bell animated-bell"></i></a>
+      <a href="logout"><i class="fas fa-sign-out-alt"></i></a>
+      <a href="profile" class="user-icon">
+        <i class="fas fa-user"></i>
+        <span class="username">{{request.user.first_name}}</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="msger-chat">
+    <div class="wrapper">
+        <h2>My Profile</h2>
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if msg %}
+            <div>{{msg}}</div>
+            {% endif %}
+          <div class="input-box">
+            <input type="text" placeholder="First name" name="{{form.first_name.name}}" value="{{form.first_name.value}}" required>
+          </div>
+          <div class="input-box">
+            <input type="text" placeholder="Last name" name="{{form.last_name.name}}" value="{{form.last_name.value}}" required>
+          </div>
+          <div class="input-box">
+            <input type="text" placeholder="Enter your email" name="{{form.email.name}}" value="{{form.email.value}}" required>
+          </div>
+          <div class="input-box">
+            <input type="file" placeholder="profile_upload" name="{{form.profile_pic.name}}" value="{{form.profile_pic.value}}" required>
+          </div>
+          
+          
+          <div class="input-box button">
+            <input type="Submit" value="Update Now">
+          </div>
+          
+        </form>
+      </div>
+
+
+  </main>
+
+</section>
+
+</body>
+
+</html>>

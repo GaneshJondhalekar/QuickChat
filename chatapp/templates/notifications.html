@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  {% load custom_filters %}
+<meta charset="utf-8">
+<title>base</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link href="{% static 'css/chat_window.css' %}" rel="stylesheet">
+
+</head>
+<body>
+<section class="msger">
+  <header class="msger-header">
+    <div class="msger-header-title">
+      <i class="fas fa-comment-alt"></i> QuickChat
+    </div>
+    
+
+    <div class="msger-header-options">
+      <a href="home-link"><i class="fas fa-home"></i></a>
+      <a href="message-link"><i class="fas fa-envelope"></i></a>
+      <a href=""><i class="fas fa-bell animated-bell"></i></a>
+      <a href="login-link"><i class="fas fa-sign-in-alt"></i></a>
+      <a href="profile" class="user-icon">
+        <i class="fas fa-user"></i>
+        <span class="username">{{request.user.first_name}}</span>
+      </a>
+    </div>
+  </header>
+  <main class="msger-chat">
+    <h2>Notifications</h2>
+    <div class="notification">
+        <ul>
+        {% for friend_request in friend_requests %}
+        <li>
+          <a href="#" class="person">
+            <img src="{{friend_request.sender.profile.profile_pic.url}}" alt="Profile Picture">
+            <div class="person-details">
+                <p class="notification-msg">{{friend_request.sender.first_name}} sent you a friend request</p>
+                <div class="notification-actions">
+                  <button class="accept-btn" data-url="{% url 'accept_friend_request' friend_request.sender.id %}">Accept</button>
+                  <button class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+          </a>
+        </li>
+        {% empty %}
+        <p>No notifications available.</p>
+
+        {% endfor %}
+        
+        </ul>
+      </div>
+      <br>
+      <div class="msger-people-list">
+        <h2>Friend Suggestions</h2>
+        
+        <div class="scroll-container">
+        <ul>
+          {% for suggestion in suggestions %}
+          <li>
+            <a href="#" class="person">
+              
+              <img src="{{suggestion.profile.profile_pic.url}}" alt="Profile Picture">
+            {% if suggestion.id|is_f_request_sent:f_requests %}
+              <div class="person-details">
+                <span class="person-name">{{suggestion.first_name}}</span>
+                <span class="" >Request sent</span>
+
+                  <button class="cancel-btn" data-url="{% url 'cancel_request' suggestion.id %}">Cancel Request</button>
+              </div>
+              {% else %}
+              <div class="person-details">
+                <span class="person-name">{{suggestion.first_name}}</span>
+                <button class="add-btn" data-url="{% url 'send_friend_request' suggestion.id %}">Add Friend</button>
+
+                  <button class="cancel-btn">Remove</button>
+              </div>
+              {% endif %}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        </div>
+      </div>
+</main>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const acceptButtons = document.querySelectorAll(".accept-btn");
+    const addButtons = document.querySelectorAll(".add-btn");
+    const cancelButtons = document.querySelectorAll(".cancel-btn");
+    acceptButtons.forEach(acceptBtn => {
+        acceptBtn.addEventListener("click", function () {
+            const friendId = this.getAttribute("data-id");
+            const url = this.getAttribute("data-url");
+            acceptFriendRequest(friendId, url);
+        });
+    });
+
+    addButtons.forEach(addBtn => {
+        addBtn.addEventListener("click", function () {
+            const friendId = this.getAttribute("data-id");
+            const url = this.getAttribute("data-url");
+            sendFriendRequest(friendId, url);
+        });
+    });
+
+    cancelButtons.forEach(cancelBtn => {
+        cancelBtn.addEventListener("click", function () {
+            const friendId = this.getAttribute("data-id");
+            const url = this.getAttribute("data-url");
+            cancelFriendRequest(friendId, url);
+        });
+    });
+
+    function sendFriendRequest(id, url) {
+        // Perform your logic here if needed
+
+        // Redirect to the specified URL
+        window.location.href = url;
+    }
+
+    function acceptFriendRequest(id, url) {
+        // Perform your logic here if needed
+
+        // Redirect to the specified URL
+        window.location.href = url;
+    }
+
+    function cancelFriendRequest(id, url) {
+        // Perform your logic here if needed
+
+        // Redirect to the specified URL
+        window.location.href = url;
+    }
+});
+
+
+</script>
+</body>
+
+</html>

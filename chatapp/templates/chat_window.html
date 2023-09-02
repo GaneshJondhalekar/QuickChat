@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% load static %}
+<head>
+<meta charset="utf-8">
+<title>QuickChat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link href="{% static 'css/chat_window.css' %}" rel="stylesheet">
+
+</head>
+<body>
+<section class="msger">
+    <header class="msger-header">
+      <div class="msger-header-title">
+        <i class="fas fa-comment-alt"></i> QuickChat
+      </div>
+      
+
+      <div class="msger-header-options">
+        <a href="home-link"><i class="fas fa-home"></i></a>
+        <a href="message-link"><i class="fas fa-envelope"></i></a>
+        <a href="notifications-link"><i class="fas fa-bell animated-bell"></i></a>
+        <a href="login-link"><i class="fas fa-sign-in-alt"></i></a>
+        <a href="profile" class="user-icon">
+          <i class="fas fa-user"></i>
+          <span class="username">{{request.user.first_name}}</span>
+        </a>
+      </div>
+    </header>
+  
+    <main class="msger-chat">
+      <div class="msg left-msg">
+        <div
+         class="msg-img"
+         style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"
+        ></div>
+  
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">BOT</div>
+            <div class="msg-info-time">12:45</div>
+          </div>
+  
+          <div class="msg-text">
+            Hi, welcome to SimpleChat! Go ahead and send me a message. 😄
+          </div>
+        </div>
+      </div>
+  
+      <div class="msg right-msg">
+        <div
+         class="msg-img"
+         style="background-image: url(https://image.flaticon.com/icons/svg/145/145867.svg)"
+        ></div>
+  
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">Sajad</div>
+            <div class="msg-info-time">12:46</div>
+          </div>
+  
+          <div class="msg-text">
+            You can change your name in JS section!
+          </div>
+        </div>
+      </div>
+    </main>
+  
+    <form class="msger-inputarea">
+      <input type="text" class="msger-input" placeholder="Enter your message...">
+      <button type="submit" class="msger-send-btn">Send</button>
+    </form>
+  </section>
+
+
+  <script>
+    const form = document.querySelector('.msger-inputarea');
+    const input = document.querySelector('.msger-input');
+    const chat = document.querySelector('.msger-chat');
+    const user_id = parseInt('{{ request.user.id }}');
+    const receiver=parseInt('{{ other_user_id }}');
+    const YOUR_PROFILE_IMAGE_URL = 'URL_to_Your_Profile_Image'; // Replace with your profile image URL
+    
+    const unsortedIDs=[user_id,receiver]
+    // Set up the WebSocket connection outside of the sendMessage function
+    const sortedIDs = unsortedIDs.sort((a, b) => a - b);
+    const roomName = sortedIDs.join('_');
+    
+    const socket = new WebSocket(
+      'ws://' + window.location.host + `/ws/${roomName}/`
+    );
+  
+    socket.addEventListener('message', (event) => {
+      const receivedMessage = JSON.parse(event.data);
+  
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add(
+        'msg',
+        receivedMessage.sender === user_id ? 'right-msg' : 'left-msg'
+      );
+  
+      msgDiv.innerHTML = `
+        <div class="msg-img" style="background-image: url(${YOUR_PROFILE_IMAGE_URL})"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">${
+              receivedMessage.sender === user_id ? 'You' : 'Sender Name'
+            }</div>
+            <div class="msg-info-time">${getCurrentTime()}</div>
+          </div>
+          <div class="msg-text">${receivedMessage.message}</div>
+        </div>
+      `;
+  
+      chat.appendChild(msgDiv);
+    });
+  
+    form.addEventListener('submit', sendMessage);
+  
+    function sendMessage(event) {
+      event.preventDefault();
+  
+      const message = input.value.trim();
+      if (message === '') return;
+  
+      // Send the message over the existing WebSocket connection
+      const data = {
+        message: message,
+      };
+      socket.send(JSON.stringify(data));
+  
+      // Create and append the sent message
+      appendMessage('You', YOUR_PROFILE_IMAGE_URL, 'right', message);
+  
+      input.value = '';
+    }
+  
+    function getCurrentTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+  
+    // Function to append a message to the chat window
+    function appendMessage(senderName, senderImage, side, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('msg', side + '-msg');
+  
+      msgDiv.innerHTML = `
+        <div class="msg-img" style="background-image: url(${senderImage})"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">${senderName}</div>
+            <div class="msg-info-time">${getCurrentTime()}</div>
+          </div>
+          <div class="msg-text">${text}</div>
+        </div>
+      `;
+  
+      chat.appendChild(msgDiv);
+    }
+  </script>
+  
+
+</body>
+
+</html>
