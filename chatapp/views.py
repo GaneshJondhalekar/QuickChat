@@ -56,6 +56,10 @@ def update_profile(request):
     if request.method=='POST':
         form=ProfileUpdateForm(request.POST,request.FILES,instance=profile)
         if form.is_valid():
+            user.first_name=form.cleaned_data['first_name']
+            user.last_name=form.cleaned_data['last_name']
+            user.email=form.cleaned_data['email']
+            user.save()
             form.save()
             return redirect('index')
         context['msg']=form.errors
@@ -69,11 +73,11 @@ def suggestion(request):
     user=request.user
     profile=UserProfile.objects.get(user=user)
     friends=profile.friends.all()
+    friend_ids = friends.values_list('id', flat=True)
     #show suggettions- show all users to login user excludes his friends,self and superuser
-    suggested_profiles=User.objects.exclude(profile__friends__in=friends).exclude(profile=profile).exclude(is_staff=True)
+    suggested_profiles=User.objects.exclude(id__in=friend_ids).exclude(profile=profile).exclude(is_staff=True)
     #login user have made following friend requests to suggetions shown on page 
     f_requests=FriendRequest.objects.filter(receiver__in=suggested_profiles,sender=user)
-
     #login user have following requests
     friend_requests=FriendRequest.objects.filter(receiver=request.user)
 

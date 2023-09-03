@@ -40,8 +40,18 @@
             <div class="person-details">
                 <p class="notification-msg">{{friend_request.sender.first_name}} sent you a friend request</p>
                 <div class="notification-actions">
-                  <button class="accept-btn" data-url="{% url 'accept_friend_request' friend_request.sender.id %}">Accept</button>
-                  <button class="cancel-btn">Cancel</button>
+                  <button style="background-color: #3498db; color: #fff; border: none; padding: 7px 10px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;font-size: 16px;
+                  border-radius: 5px;
+                  cursor: pointer; margin-left: 25px;" class="accept-btn" data-url="{% url 'accept_friend_request' friend_request.sender.id %}">Accept</button>
+                  <button style="background-color: #3498db; color: #fff; border: none; padding: 5px 7px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;font-size: 16px;
+                  border-radius: 5px;
+                  cursor: pointer; margin-left: 25px;" class="cancel-btn">Cancel</button>
                 </div>
             </div>
           </a>
@@ -73,10 +83,15 @@
               </div>
               {% else %}
               <div class="person-details">
-                <span class="person-name">{{suggestion.first_name}}</span>
-                <button class="add-btn" data-url="{% url 'send_friend_request' suggestion.id %}">Add Friend</button>
+                <span class="person-name">{{suggestion.first_name}} {{suggestion.last_name}}</span>
+                <button class="add-btn" style="background-color: #3498db; color: #fff; border: none; padding: 7px 10px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;font-size: 16px;
+                border-radius: 5px;
+                cursor: pointer; margin-left: 25px;" data-url="{% url 'send_friend_request' suggestion.id %}">Add Friend</button>
 
-                  <button class="cancel-btn">Remove</button>
+                  
               </div>
               {% endif %}
             </a>

@@ -250,6 +250,7 @@
   animation-play-state: paused; /* Apply the animation on hover */
 }
 
+
 @keyframes rotateAnimation {
   0% {
     transform: rotate(0deg);
@@ -268,4 +269,3 @@
 }
 }
 
-  
