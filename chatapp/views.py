@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 
 from .form import UserForm,ProfileUpdateForm
 from django.contrib.auth.models import User
-from .models import UserProfile,FriendRequest
+from .models import UserProfile,FriendRequest,ChatMessage
 # Create your views here.
 @login_required
 def Index(request):
@@ -107,15 +107,14 @@ def accept_friend_request(request,id):
     FriendRequest.objects.get(sender=sender,receiver=receiver).delete()
     return redirect('notifications')
 
-def chatpage(request):
-    user=request.user
-    friends=user.profile.friends.all()
-    context={'friends':friends}
-    return render(request,'chats.html',context)
-
+@login_required
 def chat_window(request,user_id):
-    return render(request,'chat_window.html', {"other_user_id": user_id})
+    sender=request.user
+    receiver=User.objects.get(pk=user_id)
+    received_messages=list(request.user.received_messages.filter(sender=receiver))
+    sent_messages=list(request.user.sent_messages.filter(receiver=receiver))
+    all_messages=received_messages+sent_messages
+    all_messages.sort(key=lambda x:x.timestamp)
 
+    return render(request,'chat_window.html', {"other_user_id": user_id,'all_messages':all_messages})
 
-def personal_chat_window(request,username):
-    return render(request,'personal_chat.html')

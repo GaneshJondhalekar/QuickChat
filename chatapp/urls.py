@@ -30,7 +30,7 @@ urlpatterns = [
    path('accept_friend_request/<int:id>/',accept_friend_request,name='accept_friend_request'),
   
    path('<int:user_id>/',chat_window,name='chat_window'),
-   path('<str:username>/',personal_chat_window,name='personal_chat_window'),
+  
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

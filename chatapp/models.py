@@ -23,14 +23,11 @@ class FriendRequest(models.Model):
 
 
 class ChatMessage(models.Model):
-    sender=models.ForeignKey(User,on_delete=models.CASCADE)
-    receiver=models.ForeignKey(User,on_delete=models.CASCADE,related_name='message')
+    sender=models.ForeignKey(User,on_delete=models.CASCADE,related_name='sent_messages')
+    receiver=models.ForeignKey(User,on_delete=models.CASCADE,related_name='received_messages')
     message=models.TextField()
+    timestamp=models.DateTimeField(auto_now_add=True,blank=True,null=True)
     seen=models.BooleanField(default=False)
 
-class Room(models.Model):
-    sender=models.ForeignKey(User,on_delete=models.CASCADE)
-    receiver=models.ForeignKey(User,on_delete=models.CASCADE ,related_name='receiver')
-
-    def __str__(self) -> str:
-        return self.receiver
+    def __str__(self):
+        return f'message from {self.sender} to {self.receiver}'

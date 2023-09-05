@@ -3,11 +3,21 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.consumer import SyncConsumer
 import json
-from .models import ChatMessage,Room
+from .models import ChatMessage
 from django.contrib.auth.models import User
-from asgiref.sync import async_to_sync
+import threading
+import asyncio
 import json
+from channels.db import database_sync_to_async
 class ChatConsumer(AsyncWebsocketConsumer):
+    
+    @database_sync_to_async
+    def save_message(self, sender, receiver, message):
+         ChatMessage.objects.create(
+                    sender=sender,
+                    receiver=receiver,
+                    message=message,
+                )   
     async def connect(self):
         self.user_id = int(self.scope['user'].id)
         #print(self.scope['url_route']['kwargs']['username'],'hiiiii')
@@ -35,11 +45,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         #print('reciever...',self.other_user_id)
-        
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
+        sender=self.scope['user']
+        receiver=await database_sync_to_async(User.objects.get)(pk=self.other_user_ids[0])
         #print('recivedMsg :',message)
-       
+        await self.save_message(sender, receiver, message)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -64,39 +75,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
        
             
-            
-
-
-class PersonalChatConsumer(SyncConsumer):
-    def websocket_connect(self, event):
-        me = self.scope['user'].username
-        other_user = self.scope['url_route']['kwargs']['username']
-       
-        usernames = sorted([me, other_user])
-        self.room_name = f'personal_chat_{usernames[0]}_{usernames[1]}'
-        async_to_sync(self.channel_layer.group_add(self.room_name, self.channel_name))
-        
-        self.send({'type': 'websocket.accept'})
-        print('Connected to websocket', self.channel_name)
-
-    def websocket_receive(self, event):
-        print('Message received', event)
-        text = event.get('text')
-        username = self.scope['user'].username
-        msg = json.dumps({'text': text, 'username': username})
-        async_to_sync(self.channel_layer.group_send(self.room_name, {
-            'type': 'websocket.message',
-            'text': msg
-        }))
-
-    def websocket_message(self, event):
-        print('Message received for the group:', event)
-        text = event['text']
-        self.send({
-            'type': 'websocket.send',
-            'text': text
-        })
-
-
-    def websocket_disconnect(self, event):
-        self.channel_layer.group_discard(self.room_name, self.channel_name)
+    
