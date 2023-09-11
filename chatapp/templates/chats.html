@@ -32,12 +32,16 @@
   <div class="msger-people-list">
     <ul>
       {% for friend in friends %}
-      <li>
+      <li class="people-li" >
         <a  href="{% url 'chat_window' friend.id %}"  class="person">
           <img src="{{friend.profile.profile_pic.url}}" alt="Profile Picture">
           <div class="person-details">
             <span class="person-name">{{friend.first_name}}</span>
-            <p class="person-msg">Hello! How are you?</p>
+            <p class="person-msg">{% if friend.latest_message %}
+              {{ friend.latest_message.message }}
+            {% else %}
+              No messages yet
+            {% endif %}</p>
           </div>
         </a>
       </li>

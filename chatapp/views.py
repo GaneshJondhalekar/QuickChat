@@ -1,17 +1,39 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import login,logout,authenticate
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Prefetch,Max,ExpressionWrapper,DateTimeField,F,Q
+from django.db.models.functions import Greatest
 from .form import UserForm,ProfileUpdateForm
 from django.contrib.auth.models import User
 from .models import UserProfile,FriendRequest,ChatMessage
+from itertools import chain
+import datetime,pytz
 # Create your views here.
 @login_required
 def Index(request):
-    user=request.user
-    friends=user.profile.friends.all()
-    context={'friends':friends}
-    return render(request,'chats.html',context)
+    user = request.user 
+    # Step 1: Retrieve a list of friends (excluding the current user)
+    friends = User.objects.exclude(id=user.id).filter(profile__friends=user)
+
+    # Step 2: Fetch the latest sent and received messages for each friend
+    for friend in friends:
+        friend.latest_sent_message = ChatMessage.objects.filter(sender=user, receiver=friend).order_by('-timestamp').first()
+        friend.latest_received_message = ChatMessage.objects.filter(sender=friend, receiver=user).order_by('-timestamp').first()
+
+    # Step 3: Determine the latest message for each friend
+    for friend in friends:
+        friend.latest_message = None
+        if friend.latest_sent_message:
+            friend.latest_message = friend.latest_sent_message
+        if friend.latest_received_message:
+            if friend.latest_message is None or friend.latest_received_message.timestamp > friend.latest_message.timestamp:
+                friend.latest_message = friend.latest_received_message
+
+    # Step 4: Sort the list of friends based on the latest message timestamp
+    friends = sorted(friends, key=lambda friend: (friend.latest_message.timestamp if friend.latest_message else datetime.datetime.min.replace(tzinfo=pytz.UTC)), reverse=True)
+
+    context = {'friends': friends}
+    return render(request, 'chats.html', context)
 
 def Login(request):
     if request.method=="POST":

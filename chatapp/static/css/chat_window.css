@@ -81,7 +81,13 @@
     background: #eee;
     color: #666;
   }
-  
+  .people-li{
+    background-color: #a6afbc;
+    border-radius: 3%;
+  }
+  .people-li:hover{
+    background-color: #bdbdbd;
+  }
   .msger-chat {
     flex: 1;
     overflow-y: auto;
